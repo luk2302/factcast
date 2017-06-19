@@ -1,6 +1,5 @@
 package org.factcast.example.bookmarx.event;
 
-import java.net.URL;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -23,7 +22,7 @@ public class BookmarkChangedEvent {
     Optional<String> newTitle = Optional.empty();
 
     @JsonProperty
-    Optional<URL> newURL = Optional.empty();
+    Optional<String> newURL = Optional.empty();
 
     @JsonProperty
     Optional<String> newDescription = Optional.empty();

@@ -1,6 +1,5 @@
 package org.factcast.example.bookmarx.event;
 
-import java.net.URL;
 import java.util.Set;
 import java.util.UUID;
 
@@ -25,7 +24,7 @@ public class BookmarkCreatedEvent {
     private String title;
 
     @NonNull
-    private URL url;
+    private String url;
 
     private String description;
 
