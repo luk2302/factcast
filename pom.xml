@@ -15,6 +15,8 @@
 		<module>factcast-client-cache</module>
 		<module>factcast-client-cache-infinispan</module>
 		<module>factcast-example-grpc</module>
+		<module>factcast-example-bookmarx-server-rest</module>
+		<module>factcast-example-bookmarx-client</module>
 		<module>factcast-store-pgsql</module>
 		<module>factcast-store-pgsql-rds</module>
 		<module>factcast-store-inmem</module>
