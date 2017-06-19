@@ -35,13 +35,14 @@
 						<configuration>
 							<arguments>install</arguments>
 						</configuration>
-					</execution>	<execution>
+					</execution>
+					<execution>
 						<id>yarn build</id>
 						<goals>
 							<goal>yarn</goal>
 						</goals>
 						<configuration>
-							<arguments>build</arguments>
+							<arguments>run build</arguments>
 						</configuration>
 					</execution>
 				</executions>
