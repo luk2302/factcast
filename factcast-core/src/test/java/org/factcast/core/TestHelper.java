@@ -4,6 +4,9 @@ import static org.junit.Assert.*;
 
 import java.util.concurrent.Callable;
 
+import lombok.experimental.UtilityClass;
+
+@UtilityClass
 public class TestHelper {
 
     public static void expectNPE(Callable<?> e) {
