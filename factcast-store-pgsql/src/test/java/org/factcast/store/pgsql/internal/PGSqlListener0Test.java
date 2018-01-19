@@ -1,7 +1,13 @@
 package org.factcast.store.pgsql.internal;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -9,6 +15,7 @@ import java.sql.SQLException;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import org.factcast.store.pgsql.PGConfigurationProperties;
 import org.factcast.store.pgsql.internal.listen.PGListener;
 import org.factcast.store.pgsql.internal.listen.PGListener.FactInsertionEvent;
 import org.junit.Test;
@@ -58,7 +65,7 @@ public class PGSqlListener0Test {
         tester = mock(Predicate.class);
         Mockito.when(tester.test(any())).thenReturn(false, false, true, false);
 
-        PGListener l = new PGListener(ds, bus, tester);
+        PGListener l = new PGListener(ds, bus, tester, new PGConfigurationProperties());
         l.afterPropertiesSet();
         verify(bus, times(3)).post(any(FactInsertionEvent.class));
         verifyNoMoreInteractions(bus);
@@ -67,7 +74,7 @@ public class PGSqlListener0Test {
 
     @Test
     public void testListen() throws Exception {
-        PGListener l = new PGListener(ds, bus, tester);
+        PGListener l = new PGListener(ds, bus, tester, new PGConfigurationProperties());
         l.afterPropertiesSet();
 
         sleep(100);
@@ -82,7 +89,7 @@ public class PGSqlListener0Test {
     @Test
     public void testNotify() throws Exception {
 
-        PGListener l = new PGListener(ds, bus, tester);
+        PGListener l = new PGListener(ds, bus, tester, new PGConfigurationProperties());
 
         when(conn.getNotifications(anyInt())).thenReturn(new PGNotification[] { //
                 new Notification(PGConstants.CHANNEL_NAME, 1), //
@@ -103,7 +110,7 @@ public class PGSqlListener0Test {
     @Test
     public void testNotifyScheduled() throws Exception {
 
-        PGListener l = new PGListener(ds, bus, tester);
+        PGListener l = new PGListener(ds, bus, tester, new PGConfigurationProperties());
 
         when(conn.getNotifications(anyInt())).thenReturn(null);
         l.afterPropertiesSet();
@@ -119,7 +126,7 @@ public class PGSqlListener0Test {
     public void testStop() throws Exception {
         Mockito.when(ds.get()).thenReturn(conn);
         Mockito.when(conn.prepareStatement(anyString())).thenReturn(mock(PreparedStatement.class));
-        PGListener l = new PGListener(ds, bus, tester);
+        PGListener l = new PGListener(ds, bus, tester, new PGConfigurationProperties());
         l.afterPropertiesSet();
         l.destroy();
 
@@ -138,7 +145,7 @@ public class PGSqlListener0Test {
     public void testStopWithoutStarting() throws Exception {
         Mockito.when(ds.get()).thenReturn(conn);
         Mockito.when(conn.prepareStatement(anyString())).thenReturn(mock(PreparedStatement.class));
-        PGListener l = new PGListener(ds, bus, tester);
+        PGListener l = new PGListener(ds, bus, tester, new PGConfigurationProperties());
         l.destroy();
 
         verifyNoMoreInteractions(conn);

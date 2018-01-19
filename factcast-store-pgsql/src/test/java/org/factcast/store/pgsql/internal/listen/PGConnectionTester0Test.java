@@ -1,14 +1,19 @@
 package org.factcast.store.pgsql.internal.listen;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.factcast.store.pgsql.PGConfigurationProperties;
 import org.factcast.store.pgsql.internal.metrics.PGMetricNames;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,7 +44,7 @@ public class PGConnectionTester0Test {
     public void setUp() {
         final String fail = new PGMetricNames().connectionFailure();
         when(registry.counter(fail)).thenReturn(counter);
-        uut = new PGConnectionTester(registry);
+        uut = new PGConnectionTester(registry, new PGConfigurationProperties());
     }
 
     @Test
@@ -122,7 +127,12 @@ public class PGConnectionTester0Test {
 
     @Test(expected = NullPointerException.class)
     public void testPGConnectionTester() throws Exception {
-        new PGConnectionTester(null);
+        new PGConnectionTester(null, new PGConfigurationProperties());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testPGConnectionTesterNullProps() throws Exception {
+        new PGConnectionTester(mock(MetricRegistry.class), null);
     }
 
 }

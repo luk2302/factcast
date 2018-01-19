@@ -8,6 +8,7 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nonnull;
 
+import org.factcast.store.pgsql.PGConfigurationProperties;
 import org.factcast.store.pgsql.internal.metrics.PGMetricNames;
 import org.postgresql.PGConnection;
 import org.springframework.stereotype.Component;
@@ -20,11 +21,11 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * Used to test if a connection is still alive.
- * 
+ *
  * Even though CPools provide this already, this one is intended to used with
  * the one {@link PGConnection}, that listens to changes on the fact table and
  * thus should not be reused in a CPool.
- * 
+ *
  * @author uwe.schaefer@mercateo.com
  *
  */
@@ -35,13 +36,16 @@ public class PGConnectionTester implements Predicate<Connection> {
 
     final Counter connectionFailureMetric;
 
-    PGConnectionTester(@NonNull MetricRegistry registry) {
+    private PGConfigurationProperties prop;
+
+    PGConnectionTester(@NonNull MetricRegistry registry, @NonNull PGConfigurationProperties prop) {
+        this.prop = prop;
         connectionFailureMetric = registry.counter(new PGMetricNames().connectionFailure());
     }
 
     @Override
     public boolean test(@Nonnull Connection connection) {
-        try (PreparedStatement statement = connection.prepareStatement("SELECT 42");
+        try (PreparedStatement statement = createStatement(connection);
                 ResultSet resultSet = statement.executeQuery();) {
             resultSet.next();
             if (resultSet.getInt(1) == 42) {
@@ -56,5 +60,11 @@ public class PGConnectionTester implements Predicate<Connection> {
 
         connectionFailureMetric.inc();
         return false;
+    }
+
+    private PreparedStatement createStatement(Connection connection) throws SQLException {
+        PreparedStatement st = connection.prepareStatement("SELECT 42");
+        st.setQueryTimeout(prop.getListenQueryTimeoutSeconds());
+        return st;
     }
 }

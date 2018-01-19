@@ -40,6 +40,14 @@ public class PGConfigurationProperties {
      */
     int queueFetchRatio = 4;
 
+    int listenConnectionTimeoutSeconds = 10;
+
+    int listenQueryTimeoutSeconds = 10;
+
+    int listenSocketTimeoutSeconds = 5;
+
+    int listenCancelSignalTimeoutSeconds = 5;
+
     public int getPageSizeForIds() {
         return pageSize * idOnlyFactor;
     }

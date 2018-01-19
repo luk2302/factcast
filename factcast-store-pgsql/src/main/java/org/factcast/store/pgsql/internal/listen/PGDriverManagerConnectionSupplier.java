@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import javax.sql.DataSource;
 
 import org.apache.tomcat.jdbc.pool.PoolConfiguration;
+import org.factcast.store.pgsql.PGConfigurationProperties;
 import org.postgresql.jdbc.PgConnection;
 import org.springframework.stereotype.Component;
 
@@ -25,11 +26,16 @@ public class PGDriverManagerConnectionSupplier implements Supplier<PgConnection>
     @NonNull
     private final org.apache.tomcat.jdbc.pool.DataSource ds;
 
+    @NonNull
+    private final PGConfigurationProperties pgConfProperties;
+
     @Inject
-    PGDriverManagerConnectionSupplier(@NonNull DataSource dataSource) {
+    PGDriverManagerConnectionSupplier(@NonNull DataSource dataSource,
+            @NonNull PGConfigurationProperties pgConfProperties) {
+        this.pgConfProperties = pgConfProperties;
 
         if (dataSource instanceof org.apache.tomcat.jdbc.pool.DataSource) {
-            this.ds = (org.apache.tomcat.jdbc.pool.DataSource) dataSource;
+            ds = (org.apache.tomcat.jdbc.pool.DataSource) dataSource;
         } else {
             throw new IllegalStateException("expected "
                     + org.apache.tomcat.jdbc.pool.DataSource.class.getName() + " , but got "
@@ -54,6 +60,7 @@ public class PGDriverManagerConnectionSupplier implements Supplier<PgConnection>
     Properties buildCredentialProperties(org.apache.tomcat.jdbc.pool.DataSource ds) {
 
         Properties dbp = new Properties();
+
         final PoolConfiguration poolProperties = ds.getPoolProperties();
         if (poolProperties != null) {
             final String user = poolProperties.getUsername();
@@ -65,6 +72,16 @@ public class PGDriverManagerConnectionSupplier implements Supplier<PgConnection>
                 dbp.setProperty("password", pwd);
             }
         }
+
+        dbp.setProperty("socketTimeout",
+                String.valueOf(pgConfProperties
+                        .getListenSocketTimeoutSeconds()));
+        dbp.setProperty("connectionTimeout",
+                String.valueOf(pgConfProperties
+                        .getListenConnectionTimeoutSeconds()));
+        dbp.setProperty("cancelSignalTimeout",
+                String.valueOf(pgConfProperties
+                        .getListenCancelSignalTimeoutSeconds()));
 
         return dbp;
     }

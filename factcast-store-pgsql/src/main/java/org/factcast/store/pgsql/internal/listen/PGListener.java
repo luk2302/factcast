@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import org.factcast.store.pgsql.PGConfigurationProperties;
 import org.factcast.store.pgsql.internal.PGConstants;
 import org.postgresql.PGNotification;
 import org.postgresql.jdbc.PgConnection;
@@ -26,10 +27,10 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * Listens (sql LISTEN command) to a channel on Postgresql and passes a trigger
  * on an EventBus.
- * 
+ *
  * This trigger then is supposed to "encourage" active subscriptions to query
  * for new Facts from PG.
- * 
+ *
  * @author uwe.schaefer@mercateo.com
  *
  */
@@ -43,6 +44,8 @@ public class PGListener implements InitializingBean, DisposableBean {
     final @NonNull EventBus eventBus;
 
     final @NonNull Predicate<Connection> pgConnectionTester;
+
+    final @NonNull PGConfigurationProperties props;
 
     final AtomicBoolean running = new AtomicBoolean(true);
 
@@ -62,6 +65,7 @@ public class PGListener implements InitializingBean, DisposableBean {
 
                 try (PgConnection pc = ds.get()) {
                     try (PreparedStatement ps = pc.prepareStatement(PGConstants.LISTEN_SQL);) {
+                        ps.setQueryTimeout(props.getListenQueryTimeoutSeconds());
                         log.trace("Running LISTEN command");
                         ps.execute();
                     }
@@ -146,7 +150,7 @@ public class PGListener implements InitializingBean, DisposableBean {
 
     @Override
     public void destroy() throws Exception {
-        this.running.set(false);
+        running.set(false);
         if (listenerThread != null) {
             listenerThread.interrupt();
         }
